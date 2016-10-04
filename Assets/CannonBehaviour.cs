@@ -2,7 +2,13 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
-
+/*
+ * Name: Thiago de Andrade Souza
+ * Date: 10/03/2016
+ * Source file name: CannonBehaviour.cs
+ * Last Modified Date: 23:03 10/03/2016
+ * Created Date: 23:03 09/29/2016
+ */
 public class CannonBehaviour : MonoBehaviour {
 
     public float factor;
