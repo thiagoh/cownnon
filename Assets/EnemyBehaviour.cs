@@ -3,54 +3,54 @@ using System.Collections;
 
 public class EnemyBehaviour : MonoBehaviour {
 
+    private Game gameController;
     // What sound to play when hit
     public AudioClip hitSound;
 
     // How fast will the enemy move
-    public float startSpeed = 5.0f;
-
-    public float speed;
-
+    public float initialSpeed = 6.0f;
+    public float currentSpeed;
     private float lifeLostOnHit = 6.0f;
 
     // create an AudioSource variable
     private AudioSource audioSource;
-    private Vector3 movement;
-
+    private Vector2 angularDirection;
+    private Transform _transform;
     private CannonBehaviour cannonController;
 
     // Use this for initialization
     void Start() {
-
+        _transform = GetComponent<Transform>();
         audioSource = GetComponent<AudioSource>();
+        gameController = GameObject.FindObjectOfType<Game>();
         cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
-
         resetSpeed();
     }
 
     // Update is called once per frame
     void Update() {
 
-        if (movement.magnitude > 0) {
-            transform.Translate(movement * Time.deltaTime * speed, Space.World);
+        if (angularDirection.magnitude > 0) {
+
+            float windSpeed = gameController.windSpeed * gameController.windDirection;
+            _transform.Translate(angularDirection * Time.deltaTime * (currentSpeed + windSpeed), Space.World);
         }
 
-        speed -= 3 * Time.deltaTime;
+        currentSpeed -= 3 * Time.deltaTime;
     }
 
     private void resetSpeed() {
-        speed = startSpeed;
-        movement = (Vector3.left * Random.Range(0.2f, 0.6f)) + (Vector3.up * Random.Range(0.3f, 0.9f));
 
-        if (cannonController.isGameOver()) {
+        currentSpeed = initialSpeed;
+        angularDirection = (Vector2.left * Random.Range(0.8f, 1.2f)) + (Vector2.up * Random.Range(0.8f, 1.2f));
+
+        if (gameController.isGameOver()) {
             /*
              * If the game is over, the enemies are going to keep jumping up, 
              * but not towwards left anymore, to produce a funny scene!
              */
-            movement = (Vector3.up * Random.Range(0.3f, 0.9f));
+            angularDirection = Vector3.up;
         }
-
-        movement.Normalize();
     }
 
     void OnCollisionEnter2D(Collision2D theCollision) {
@@ -61,7 +61,6 @@ public class EnemyBehaviour : MonoBehaviour {
 
             BombBehaviour bomb = theCollision.gameObject.GetComponent<BombBehaviour>();
             bomb.life -= 1;
-
 
             // Plays a sound from this object's AudioSource
             audioSource.PlayOneShot(hitSound, 1.0f);

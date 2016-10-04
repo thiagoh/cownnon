@@ -3,10 +3,9 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-using UnityEngine.UI;
-
 public class CannonBehaviour : MonoBehaviour {
 
+    private Game gameController;
     public float factor;
     // The ball cannon will shoot
     public Transform bomb;
@@ -24,18 +23,14 @@ public class CannonBehaviour : MonoBehaviour {
     // What sound to play when we're shooting
     public AudioClip shootSound;
 
-    public AudioClip gameOverSound;
-
     public float initialLife = 100f;
     public float currentLife = 100f;
 
     private float _playerSpeed = 5f;
+
     private float _playerInput;
     private Vector2 _currentPosition;
     private Transform _transform;
-
-    public Image gameOverImage;
-    public bool _gameOver = false;
 
     private Transform body;
     private Transform wheel;
@@ -44,24 +39,23 @@ public class CannonBehaviour : MonoBehaviour {
     public float bombDistance = .8f;
 
     // How much time (in seconds) we should wait before we can fire again
-    public float timeBetweenFires = .3f;
+    public float timeBetweenFires = .5f;
     // If value is less than or equal 0, we can fire
     private float timeTilNextFire = 0.0f;
 
     // Use this for initialization
     void Start() {
+        gameController = GameObject.FindObjectOfType<Game>();
         audioSource = GetComponent<AudioSource>();
         _transform = GetComponent<Transform>();
         body = _transform.FindChild("Body");
         wheel = _transform.FindChild("Wheel");
-        _gameOver = false;
-        gameOverImage.enabled = false;
     }
 
     // Update is called once per frame
     void Update() {
 
-        if (isGameOver()) {
+        if (gameController.isGameOver()) {
             /*
              * If the game is over, the cannon cannot do anything
              */
@@ -75,23 +69,6 @@ public class CannonBehaviour : MonoBehaviour {
         rotation();
 
         checkShoot();
-
-        checkGameOver();
-    }
-
-    private void checkGameOver() {
-
-        if (_gameOver) {
-            return;
-        }
-
-        if (currentLife <= 0) {
-            Debug.Log("GAME OVER!!");
-
-            audioSource.PlayOneShot(gameOverSound, 1.0f);
-            gameOverImage.enabled = true;
-            _gameOver = true;
-        }
     }
 
     private void shoot() {
@@ -112,14 +89,10 @@ public class CannonBehaviour : MonoBehaviour {
         Instantiate(bomb, bombPos, body.rotation);
     }
 
-    public bool isGameOver() {
-        return _gameOver;
-    }
-
     private void checkShoot() {
 
         foreach (KeyCode element in shootButton) {
-            if (Input.GetKey(element) && timeTilNextFire < 0) {
+            if (Input.GetKeyDown(element) && timeTilNextFire < 0) {
                 timeTilNextFire = timeBetweenFires;
                 shoot();
                 break;

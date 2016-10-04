@@ -1,24 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Game : MonoBehaviour {
 
     public float timeScale;
 
     public Transform enemy;
-
+    public bool _gameOver = false;
     private int currentNumberOfEnemies = 0;
-
+    public float windSpeed;
+    public float windDirection;
     public float timeBetweenEnemies;
-
+    public Image gameOverImage;
     public float minTimeBetweenEnemies;
-
+    // Reference to our AudioSource component
+    private AudioSource audioSource;
+    public AudioClip gameOverSound;
     private CannonBehaviour cannonController;
 
     // Use this for initialization
     void Start() {
 
+        _gameOver = false;
+        gameOverImage.enabled = false;
         cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
+        audioSource = GetComponent<AudioSource>();
+
+        windDirection = 1;
+        windSpeed = 0.1f;
 
         Time.timeScale = timeScale;
         print("Starting " + Time.time);
@@ -31,7 +41,7 @@ public class Game : MonoBehaviour {
 
         yield return new WaitForSeconds(waitTime);
 
-        while (!cannonController.isGameOver()) {
+        while (!isGameOver()) {
             // We want the enemies to be off screen
             float randDistance = Random.Range(-1.8f, 2.0f);
 
@@ -45,7 +55,7 @@ public class Game : MonoBehaviour {
             Instantiate(enemy, enemyPos, transform.rotation);
             currentNumberOfEnemies++;
 
-            if (currentNumberOfEnemies % 10 == 0) {
+            if (currentNumberOfEnemies % 7 == 0) {
                 timeBetweenEnemies *= 0.9f;
             }
 
@@ -60,6 +70,25 @@ public class Game : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        checkGameOver();
+    }
 
+    private void checkGameOver() {
+
+        if (_gameOver) {
+            return;
+        }
+
+        if (cannonController.currentLife <= 0) {
+            Debug.Log("GAME OVER!!");
+
+            audioSource.PlayOneShot(gameOverSound, 1.0f);
+            gameOverImage.enabled = true;
+            _gameOver = true;
+        }
+    }
+
+    public bool isGameOver() {
+        return _gameOver;
     }
 }
