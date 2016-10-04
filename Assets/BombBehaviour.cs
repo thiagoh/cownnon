@@ -44,7 +44,7 @@ public class BombBehaviour : MonoBehaviour {
 
         if (timespan > 0.5f) {
             float angle = Quaternion.Angle(transform.rotation, Quaternion.Euler(1, 0, 0));
-            Debug.LogWarning("angle: " + angle + "speed:" + speed);
+            //Debug.LogWarning("angle: " + angle + "speed:" + speed);
             timespan = 0.0f;
         }
 

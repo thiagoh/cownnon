@@ -3,48 +3,69 @@ using System.Collections;
 
 public class EnemyBehaviour : MonoBehaviour {
 
-    private Game gameController;
     // What sound to play when hit
     public AudioClip hitSound;
 
+    // how left speed is going to increase
+    private float _speedIncrease;
     // How fast will the enemy move
-    public float initialSpeed = 6.0f;
-    public float currentSpeed;
-    private float lifeLostOnHit = 6.0f;
-
+    private float _initialSpeed;
+    private float _currentSpeed;
+    private float _lifeLostOnHit;
+    private float _lastFlip;
     // create an AudioSource variable
     private AudioSource audioSource;
+    private SpriteRenderer _spriteRenderer;
     private Vector2 angularDirection;
     private Transform _transform;
-    private CannonBehaviour cannonController;
+
+    private Game _gameController;
+    private CannonBehaviour _cannonController;
 
     // Use this for initialization
     void Start() {
         _transform = GetComponent<Transform>();
         audioSource = GetComponent<AudioSource>();
-        gameController = GameObject.FindObjectOfType<Game>();
-        cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
-        resetSpeed();
+        _gameController = GameObject.FindObjectOfType<Game>();
+        _cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _resetSpeed();
+        _lifeLostOnHit = 6.0f;
+        _initialSpeed = 5.5f;
+        _lastFlip = 0f;
+        
     }
 
     // Update is called once per frame
     void Update() {
 
-        if (angularDirection.magnitude > 0) {
+        if (_gameController.isGameOver()) {
 
-            float windSpeed = gameController.windSpeed * gameController.windDirection;
-            _transform.Translate(angularDirection * Time.deltaTime * (currentSpeed + windSpeed), Space.World);
+            _lastFlip += Time.deltaTime;
+
+            // Flip the enemies to make some fun!
+            if (_lastFlip > 0.5f) {
+                _spriteRenderer.flipY = !_spriteRenderer.flipY;
+                _lastFlip = 0;
+            }
         }
 
-        currentSpeed -= 3 * Time.deltaTime;
+        if (angularDirection.magnitude > 0) {
+
+            float _speed = Mathf.Clamp(_currentSpeed + (_gameController.windSpeed * _gameController.windDirection), 0, _initialSpeed);
+            _transform.Translate(angularDirection * Time.deltaTime * _speed, Space.World);
+        }
+
+        _currentSpeed -= 3 * Time.deltaTime;
     }
 
-    private void resetSpeed() {
+    private void _resetSpeed() {
 
-        currentSpeed = initialSpeed;
-        angularDirection = (Vector2.left * Random.Range(0.8f, 1.2f)) + (Vector2.up * Random.Range(0.8f, 1.2f));
+        _currentSpeed = _initialSpeed;
+        float speedIncrease = _gameController.enemySpeedIncrease;
+        angularDirection = (Vector2.left * (Random.Range(0.8f, 1.2f) + speedIncrease)) + (Vector2.up * (Random.Range(0.8f, 1.2f) + speedIncrease));
 
-        if (gameController.isGameOver()) {
+        if (_gameController.isGameOver()) {
             /*
              * If the game is over, the enemies are going to keep jumping up, 
              * but not towwards left anymore, to produce a funny scene!
@@ -70,16 +91,16 @@ public class EnemyBehaviour : MonoBehaviour {
 
         } else if (theCollision.gameObject.CompareTag("Cannon")) {
 
-            float initialLife = cannonController.initialLife;
-            float currentLife = cannonController.currentLife;
+            float initialLife = _cannonController.initialLife;
+            float currentLife = _cannonController.currentLife;
             float lostLifeSize = (initialLife - currentLife) * 360;
 
-            cannonController.currentLife = Mathf.Clamp(cannonController.currentLife - lifeLostOnHit, 0, initialLife);
+            _cannonController.currentLife = Mathf.Clamp(_cannonController.currentLife - _lifeLostOnHit, 0, initialLife);
             //Debug.Log("life lost: " + currentLife);
         }
 
         if (theCollision.gameObject.name.StartsWith("Ground")) {
-            resetSpeed();
+            _resetSpeed();
         }
     }
 }

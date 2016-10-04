@@ -44,8 +44,8 @@ public class LifebarBehaviour : MonoBehaviour {
             _lifeLostTransform.localScale = new Vector2(Mathf.Clamp(lostLifeSize, 0, 35.55f), 1);
             _lifeLostTransform.localPosition = new Vector2(Mathf.Clamp(initialPos - (factor * maxDistanceWalkedByBar), finalPos, initialPos), _lifeLostTransform.localPosition.y);
 
-            Debug.Log("lostLifeSize:" + lostLifeSize + ", factor: " + factor);
-            Debug.LogWarning("new pos:" + _lifeLostTransform.localPosition.x);
+            //Debug.Log("lostLifeSize:" + lostLifeSize + ", factor: " + factor);
+            //Debug.LogWarning("new pos:" + _lifeLostTransform.localPosition.x);
         }
 
 

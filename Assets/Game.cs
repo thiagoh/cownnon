@@ -5,30 +5,32 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour {
 
     public float timeScale;
-
     public Transform enemy;
-    public bool _gameOver = false;
-    private int currentNumberOfEnemies = 0;
+    private bool _gameOver = false;
     public float windSpeed;
     public float windDirection;
     public float timeBetweenEnemies;
-    public Image gameOverImage;
+    public Image _gameOverImage;
     public float minTimeBetweenEnemies;
-    // Reference to our AudioSource component
-    private AudioSource audioSource;
     public AudioClip gameOverSound;
-    private CannonBehaviour cannonController;
+
+    public float enemySpeedIncrease;
+    private int _currentNumberOfEnemies = 0;
+    // Reference to our AudioSource component
+    private AudioSource _audioSource;
+    private CannonBehaviour _cannonController;
 
     // Use this for initialization
     void Start() {
 
         _gameOver = false;
-        gameOverImage.enabled = false;
-        cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
-        audioSource = GetComponent<AudioSource>();
+        _gameOverImage.enabled = false;
+        _cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
+        _audioSource = GetComponent<AudioSource>();
 
+        enemySpeedIncrease = 0f;
         windDirection = 1;
-        windSpeed = 0.1f;
+        windSpeed = 0.4f;
 
         Time.timeScale = timeScale;
         print("Starting " + Time.time);
@@ -53,9 +55,9 @@ public class Game : MonoBehaviour {
 
             // Spawn the enemy and increment the number of enemies spawned
             Instantiate(enemy, enemyPos, transform.rotation);
-            currentNumberOfEnemies++;
+            _currentNumberOfEnemies++;
 
-            if (currentNumberOfEnemies % 7 == 0) {
+            if (_currentNumberOfEnemies % 7 == 0) {
                 timeBetweenEnemies *= 0.9f;
             }
 
@@ -71,19 +73,22 @@ public class Game : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         checkGameOver();
+
+        enemySpeedIncrease = Mathf.Clamp(enemySpeedIncrease + (Time.deltaTime / 250f), 0f, 0.4f);
+        print("enemySpeedIncrease: " + enemySpeedIncrease);
     }
 
     private void checkGameOver() {
 
-        if (_gameOver) {
+        if (isGameOver()) {
             return;
         }
 
-        if (cannonController.currentLife <= 0) {
-            Debug.Log("GAME OVER!!");
+        if (_cannonController.currentLife <= 0) {
+            print("GAME OVER!!");
 
-            audioSource.PlayOneShot(gameOverSound, 1.0f);
-            gameOverImage.enabled = true;
+            _audioSource.PlayOneShot(gameOverSound, 1.0f);
+            _gameOverImage.enabled = true;
             _gameOver = true;
         }
     }

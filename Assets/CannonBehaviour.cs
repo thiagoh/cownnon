@@ -5,16 +5,12 @@ using System.Collections.Generic;
 
 public class CannonBehaviour : MonoBehaviour {
 
-    private Game gameController;
     public float factor;
     // The ball cannon will shoot
     public Transform bomb;
 
     public float maxAngle = 70.0f;
     public float minAngle = 10.0f;
-
-    // Reference to our AudioSource component
-    private AudioSource audioSource;
 
     public Camera mainCamera;
 
@@ -23,17 +19,19 @@ public class CannonBehaviour : MonoBehaviour {
     // What sound to play when we're shooting
     public AudioClip shootSound;
 
-    public float initialLife = 100f;
-    public float currentLife = 100f;
+    public float initialLife;
+    public float currentLife;
 
     private float _playerSpeed = 5f;
-
+    private Game _gameController;
+    // Reference to our AudioSource component
+    private AudioSource audioSource;
     private float _playerInput;
     private Vector2 _currentPosition;
     private Transform _transform;
 
-    private Transform body;
-    private Transform wheel;
+    private Transform _body;
+    private Transform _wheel;
 
     // How far from the center of the ship should the bomb be
     public float bombDistance = .8f;
@@ -45,17 +43,20 @@ public class CannonBehaviour : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        gameController = GameObject.FindObjectOfType<Game>();
-        audioSource = GetComponent<AudioSource>();
+        _gameController = GameObject.FindObjectOfType<Game>();
         _transform = GetComponent<Transform>();
-        body = _transform.FindChild("Body");
-        wheel = _transform.FindChild("Wheel");
+        _body = _transform.FindChild("Body");
+        _wheel = _transform.FindChild("Wheel");
+        initialLife = 100f;
+        currentLife = 100f;
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update() {
 
-        if (gameController.isGameOver()) {
+        if (_gameController.isGameOver()) {
             /*
              * If the game is over, the cannon cannot do anything
              */
@@ -79,14 +80,14 @@ public class CannonBehaviour : MonoBehaviour {
         // our player's location
         Vector3 bombPos = transform.position;
         // The angle the bomb will move away from the center
-        float rotationAngle = body.localEulerAngles.z;
+        float rotationAngle = _body.localEulerAngles.z;
 
         // Calculate the position right in front of the ship's position laserDistance units away
         bombPos.x += Mathf.Cos(rotationAngle * Mathf.Deg2Rad) * bombDistance;
         bombPos.y += Mathf.Sin(rotationAngle * Mathf.Deg2Rad) * bombDistance;
-        bombPos.z = body.localEulerAngles.z;
+        bombPos.z = _body.localEulerAngles.z;
 
-        Instantiate(bomb, bombPos, body.rotation);
+        Instantiate(bomb, bombPos, _body.rotation);
     }
 
     private void checkShoot() {
@@ -116,21 +117,21 @@ public class CannonBehaviour : MonoBehaviour {
 		* Get the differences from each axis (stands for
 		* deltaX and deltaY)
 		*/
-        Quaternion rotation = body.GetComponent<HingeJoint2D>().transform.rotation;
+        Quaternion rotation = _body.GetComponent<HingeJoint2D>().transform.rotation;
         float currentAngle = Quaternion.Angle(rotation, Quaternion.Euler(1, 0, 0));
         //Debug.LogWarning(" currentAngle: " + currentAngle + " angleMovement.z: " + angleMovement.z);
 
         if (Math.Abs(angleMovement.z) > 0.001f) {
 
-            body.GetComponent<HingeJoint2D>().transform.Rotate(0, 0, angleMovement.z);
-            currentAngle = Quaternion.Angle(body.GetComponent<HingeJoint2D>().transform.rotation, Quaternion.Euler(1, 0, 0));
+            _body.GetComponent<HingeJoint2D>().transform.Rotate(0, 0, angleMovement.z);
+            currentAngle = Quaternion.Angle(_body.GetComponent<HingeJoint2D>().transform.rotation, Quaternion.Euler(1, 0, 0));
         }
 
         if (currentAngle < minAngle) {
-            body.GetComponent<HingeJoint2D>().transform.rotation = Quaternion.Euler(new Vector3(0, 0, minAngle));
+            _body.GetComponent<HingeJoint2D>().transform.rotation = Quaternion.Euler(new Vector3(0, 0, minAngle));
         }
         if (currentAngle > maxAngle) {
-            body.GetComponent<HingeJoint2D>().transform.rotation = Quaternion.Euler(new Vector3(0, 0, maxAngle));
+            _body.GetComponent<HingeJoint2D>().transform.rotation = Quaternion.Euler(new Vector3(0, 0, maxAngle));
         }
 
         currentAngle = Quaternion.Angle(rotation, Quaternion.Euler(1, 0, 0));
