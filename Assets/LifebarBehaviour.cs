@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/*
+ * Name: Thiago de Andrade Souza
+ * Date: 10/03/2016
+ * Source file name: LifebarBehaviour.cs
+ * Last Modified Date: 23:03 10/03/2016
+ * Created Date: 23:03 09/29/2016
+ */
 public class LifebarBehaviour : MonoBehaviour {
 
     public Transform cannon;
