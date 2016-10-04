@@ -13,18 +13,25 @@ public class Game : MonoBehaviour {
 
     public float minTimeBetweenEnemies;
 
+    private CannonBehaviour cannonController;
+
     // Use this for initialization
     void Start() {
+
+        cannonController = GameObject.FindObjectOfType<CannonBehaviour>();
+
         Time.timeScale = timeScale;
         print("Starting " + Time.time);
+
         StartCoroutine(WaitAndSpawnEnemies(2.0f));
         print("Before WaitAndSpawnEnemies Finishes " + Time.time);
     }
 
     IEnumerator WaitAndSpawnEnemies(float waitTime) {
+
         yield return new WaitForSeconds(waitTime);
 
-        while (true) {
+        while (!cannonController.isGameOver()) {
             // We want the enemies to be off screen
             float randDistance = Random.Range(-1.8f, 2.0f);
 

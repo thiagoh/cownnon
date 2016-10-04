@@ -3,14 +3,10 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
+using UnityEngine.UI;
+
 public class CannonBehaviour : MonoBehaviour {
 
-    // Movement modifier applied to directional movement.
-    public float playerSpeed = 4.0f;
-    // What the current speed of our player is
-    private float currentSpeed = 0.0f;
-    // The last movement that we've made
-    private Vector3 lastMovement = new Vector3();
     public float factor;
     // The ball cannon will shoot
     public Transform bomb;
@@ -28,8 +24,20 @@ public class CannonBehaviour : MonoBehaviour {
     // What sound to play when we're shooting
     public AudioClip shootSound;
 
-    private Transform body;
+    public AudioClip gameOverSound;
 
+    public float initialLife = 100f;
+    public float currentLife = 100f;
+
+    private float _playerSpeed = 5f;
+    private float _playerInput;
+    private Vector2 _currentPosition;
+    private Transform _transform;
+
+    public Image gameOverImage;
+    public bool _gameOver = false;
+
+    private Transform body;
     private Transform wheel;
 
     // How far from the center of the ship should the bomb be
@@ -43,12 +51,22 @@ public class CannonBehaviour : MonoBehaviour {
     // Use this for initialization
     void Start() {
         audioSource = GetComponent<AudioSource>();
-        body = transform.FindChild("Body");
-        wheel = transform.FindChild("Wheel");
+        _transform = GetComponent<Transform>();
+        body = _transform.FindChild("Body");
+        wheel = _transform.FindChild("Wheel");
+        _gameOver = false;
+        gameOverImage.enabled = false;
     }
 
     // Update is called once per frame
     void Update() {
+
+        if (isGameOver()) {
+            /*
+             * If the game is over, the cannon cannot do anything
+             */
+            return;
+        }
 
         // Move the cannon's body
         movement();
@@ -57,6 +75,23 @@ public class CannonBehaviour : MonoBehaviour {
         rotation();
 
         checkShoot();
+
+        checkGameOver();
+    }
+
+    private void checkGameOver() {
+
+        if (_gameOver) {
+            return;
+        }
+
+        if (currentLife <= 0) {
+            Debug.Log("GAME OVER!!");
+
+            audioSource.PlayOneShot(gameOverSound, 1.0f);
+            gameOverImage.enabled = true;
+            _gameOver = true;
+        }
     }
 
     private void shoot() {
@@ -76,6 +111,11 @@ public class CannonBehaviour : MonoBehaviour {
 
         Instantiate(bomb, bombPos, body.rotation);
     }
+
+    public bool isGameOver() {
+        return _gameOver;
+    }
+
     private void checkShoot() {
 
         foreach (KeyCode element in shootButton) {
@@ -125,31 +165,18 @@ public class CannonBehaviour : MonoBehaviour {
     }
 
     private void movement() {
-        // The movement that needs to occur this frame
-        Vector3 groundMovement = new Vector3();
-        // Check for input
-        groundMovement.x += Input.GetAxis("Horizontal");
 
-        groundMovement.Normalize();
+        this._currentPosition = this._transform.position;
+        this._playerInput = Input.GetAxis("Horizontal");
 
-        // Check if we pressed anything
-        if (groundMovement.magnitude > 0) {
-            // If we did, move in that direction
-            currentSpeed = playerSpeed;
-            transform.Translate(groundMovement * Time.deltaTime * playerSpeed, Space.World);
-            lastMovement = groundMovement;
-
-            //mainCamera.transform.Translate(groundMovement * Time.deltaTime * playerSpeed, Space.World);
-        } else {
-            // Otherwise, move in the direction we were going
-            transform.Translate(lastMovement * Time.deltaTime *
-                currentSpeed, Space.World);
-
-            //mainCamera.transform.Translate(lastMovement * Time.deltaTime *
-            //    currentSpeed, Space.World);
-
-            // Slow down over time
-            currentSpeed *= .9f;
+        if (this._playerInput > 0) {
+            this._currentPosition += new Vector2(Time.deltaTime * _playerSpeed, 0);
         }
+
+        if (this._playerInput < 0) {
+            this._currentPosition -= new Vector2(Time.deltaTime * _playerSpeed, 0);
+        }
+
+        this._transform.position = new Vector2(Mathf.Clamp(this._currentPosition.x, -7.358f, -5.66f), this._currentPosition.y);
     }
 }
